@@ -17,7 +17,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	workingDir = filepath.Join(workingDir, "..", "iac")
 	templateDir := filepath.Join(workingDir, "templates")
 
 	globPattern := workingDir + "/**/*.tpl"
