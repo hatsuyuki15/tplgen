@@ -1,4 +1,4 @@
-module org.hatsuyuki.tplgen
+module tplgen
 
 go 1.13
 
