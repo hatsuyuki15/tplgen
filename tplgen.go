@@ -32,8 +32,7 @@ func main() {
 			log.Fatal("File reading error: "+file, err)
 		}
 		spec := parseSpec(string(data))
-		templatePath := filepath.Join(templateDir, spec.Template)
-		result := evaluateTemplate(spec, templatePath)
+		result := evaluateTemplate(spec, templateDir)
 		writeToFile(file, result)
 	}
 }
@@ -46,9 +45,14 @@ func writeToFile(file string, content string) {
 	}
 }
 
-func evaluateTemplate(spec Spec, templatePath string) string {
+func evaluateTemplate(spec Spec, templateDir string) string {
 	tmpfile := createTempFile(spec.toString())
 	defer os.Remove(tmpfile.Name())
+
+	templatePath := filepath.Join(templateDir, spec.Template)
+	if !pathExist(templatePath) {
+		log.Fatalln("Template not exist: ", templatePath)
+	}
 
 	cmd := exec.Command("ytt", "-f", templatePath, "-f", tmpfile.Name())
 
@@ -101,4 +105,12 @@ func (s Spec) toString() string {
 	}
 	res := "#@data/values\n#@overlay/match-child-defaults missing_ok=True\n---\n" + string(out)
 	return res
+}
+
+func pathExist(filename string) bool {
+	_, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
