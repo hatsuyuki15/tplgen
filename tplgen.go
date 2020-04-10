@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, file := range files {
-		log.Println("Processing :" + file)
+		log.Println("Processing: " + file)
 		data, err := ioutil.ReadFile(file)
 		if err != nil {
 			log.Fatal("File reading error: "+file, err)
