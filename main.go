@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -24,8 +25,14 @@ func main() {
 		data := readFile(file)
 		spec := parseSpec(data)
 		evaluatedResult := evaluate(spec, templateDir)
-		writeFile(file+".yaml", evaluatedResult)
+		writeToStdout(file, evaluatedResult)
 	}
+}
+
+func writeToStdout(file string, content string) {
+	fmt.Println("---")
+	fmt.Println("#", file)
+	fmt.Println(content)
 }
 
 func evaluate(spec Spec, templateDir string) string {
