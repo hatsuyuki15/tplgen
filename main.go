@@ -21,7 +21,6 @@ func main() {
 
 	files := listFiles(workingDir)
 	for _, file := range files {
-		log.Println("Processing: " + file)
 		data := readFile(file)
 		spec := parseSpec(data)
 		evaluatedResult := evaluate(spec, templateDir)
