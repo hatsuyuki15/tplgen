@@ -12,13 +12,21 @@ type Spec struct {
 	Values    yaml.MapSlice
 }
 
-func (s Spec) toString() string {
+func (s Spec) toYtt() string {
 	out, err := yaml.Marshal(s)
 	if err != nil {
 		log.Fatal(err)
 	}
 	res := "#@data/values\n#@overlay/match-child-defaults missing_ok=True\n---\n" + string(out)
 	return res
+}
+
+func (s Spec) toHelm() string {
+	out, err := yaml.Marshal(s.Values)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(out)
 }
 
 func parseSpec(data string) Spec {

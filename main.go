@@ -37,13 +37,18 @@ func writeToStdout(file string, content string) {
 }
 
 func evaluate(spec Spec, templateDir string) string {
-	tmpfile := createTempFile(spec.toString())
-	defer os.Remove(tmpfile.Name())
-
 	templatePath := filepath.Join(templateDir, spec.Template)
 	if !pathExist(templatePath) {
 		log.Fatal("Template not exist: ", templatePath)
 	}
+
+	var tmpfile *os.File
+	if isHelmTemplate(templatePath) {
+		tmpfile = createTempFile(spec.toHelm())
+	} else {
+		tmpfile = createTempFile(spec.toYtt())
+	}
+	defer os.Remove(tmpfile.Name())
 
 	var cmd *exec.Cmd
 	if isHelmTemplate(templatePath) {
