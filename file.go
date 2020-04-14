@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func readFile(file string) string {
@@ -22,6 +24,23 @@ func listFiles(directory string) []string {
 		log.Fatal(err)
 	}
 	return files
+}
+
+func excludePath(files []string, path string) (res []string) {
+	for _, file := range files {
+		if !hasSubPath(path, file) {
+			res = append(res, file)
+		}
+	}
+	return res
+}
+
+func hasSubPath(path string, subPath string) bool {
+	relativePath, err := filepath.Rel(path, subPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return !strings.Contains(relativePath, "..")
 }
 
 func writeFile(file string, content string) {

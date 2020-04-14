@@ -21,6 +21,7 @@ func main() {
 	}
 
 	files := listFiles(workingDir)
+	files = excludePath(files, templateDir)
 	for _, file := range files {
 		data := readFile(file)
 		spec := parseSpec(data)
@@ -44,7 +45,12 @@ func evaluate(spec Spec, templateDir string) string {
 		log.Fatal("Template not exist: ", templatePath)
 	}
 
-	cmd := exec.Command("ytt", "-f", templatePath, "-f", tmpfile.Name())
+	var cmd *exec.Cmd
+	if isHelmTemplate(templatePath) {
+		cmd = exec.Command("helm", "template", "-n", spec.Namespace, spec.Name, templatePath, "-f", tmpfile.Name())
+	} else {
+		cmd = exec.Command("ytt", "-f", templatePath, "-f", tmpfile.Name())
+	}
 
 	var out, errOut bytes.Buffer
 	cmd.Stdout = &out
@@ -55,4 +61,8 @@ func evaluate(spec Spec, templateDir string) string {
 	}
 
 	return out.String()
+}
+
+func isHelmTemplate(path string) bool {
+	return pathExist(filepath.Join(path, "Chart.yaml"))
 }

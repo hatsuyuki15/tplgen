@@ -6,8 +6,10 @@ import (
 )
 
 type Spec struct {
-	Template string
-	Values   yaml.MapSlice
+	Name      string
+	Namespace string
+	Template  string
+	Values    yaml.MapSlice
 }
 
 func (s Spec) toString() string {
