@@ -37,3 +37,8 @@ func parseSpec(data string) Spec {
 	}
 	return spec
 }
+
+func (s Spec) patch(patch Patch) Spec {
+	s.Namespace = patch.Namespace
+	return s
+}

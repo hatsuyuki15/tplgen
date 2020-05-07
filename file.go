@@ -17,8 +17,8 @@ func readFile(file string) string {
 	return string(data)
 }
 
-func listFiles(directory string) []string {
-	globPattern := directory + "/**/*.tpl"
+func listFiles(directory string, pattern string) []string {
+	globPattern := filepath.Join(directory, pattern)
 	files, err := doublestar.Glob(globPattern)
 	if err != nil {
 		log.Fatal(err)

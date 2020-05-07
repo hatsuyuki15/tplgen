@@ -20,13 +20,36 @@ func main() {
 		log.Fatal("Template dir doesn't exist: " + templateDir)
 	}
 
-	files := listFiles(workingDir)
-	files = excludePath(files, templateDir)
+	files := listFiles(workingDir, "**/tplgen.yaml")
 	for _, file := range files {
 		data := readFile(file)
+		patch := parsePatch(data)
+		processPatch(patch, file, templateDir)
+	}
+}
+
+func processPatch(patch Patch, patchFile string, templateDir string) {
+	for _, resourcePath := range patch.Resources {
+		resourceRootPath := filepath.Dir(patchFile)
+		resources := listFiles(resourceRootPath, resourcePath)
+		for _, resource := range resources {
+			processResource(resource, patch, templateDir)
+		}
+	}
+}
+
+func processResource(resource string, patch Patch, templateDir string) {
+	data := readFile(resource)
+	ext := filepath.Ext(resource)
+	if ext == ".tpl" {
 		spec := parseSpec(data)
+		spec = spec.patch(patch)
 		evaluatedResult := evaluate(spec, templateDir)
-		writeToStdout(file, evaluatedResult)
+		writeToStdout(resource, evaluatedResult)
+	} else {
+		manifest := parseManifest(data)
+		manifest = manifest.patch(patch)
+		writeToStdout(resource, manifest.evaluate())
 	}
 }
 
