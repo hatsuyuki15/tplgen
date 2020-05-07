@@ -9,7 +9,8 @@ type Manifest struct {
 	ApiVersion string `yaml:"apiVersion"`
 	Kind       string
 	Metadata   yaml.MapSlice
-	Spec       yaml.MapSlice
+	Spec       yaml.MapSlice `yaml:"spec,omitempty"`
+	Data 	   yaml.MapSlice `yaml:"data,omitempty"`
 }
 
 func parseManifest(data string) Manifest {
