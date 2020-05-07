@@ -12,7 +12,7 @@ type Patch struct {
 
 func parsePatch(data string) Patch {
 	var patch Patch
-	err := yaml.UnmarshalStrict([]byte(data), &patch)
+	err := yaml.Unmarshal([]byte(data), &patch)
 	if err != nil {
 		log.Fatal(err)
 	}

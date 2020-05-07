@@ -22,17 +22,22 @@ func parseManifest(data string) Manifest {
 }
 
 func (m Manifest) patch(patch Patch) Manifest {
-	for i, item := range m.Metadata {
-		if item.Key == "Namespace" {
-			item.Value = patch.Namespace
-			m.Metadata[i] = item
-			return m
+	if patch.Namespace != "" {
+		var namespaceExist = false
+		for i, item := range m.Metadata {
+			if item.Key == "Namespace" {
+				item.Value = patch.Namespace
+				m.Metadata[i] = item
+				namespaceExist = true
+			}
+		}
+		if !namespaceExist {
+			m.Metadata = append(m.Metadata, yaml.MapItem{
+				Key:   "namespace",
+				Value: patch.Namespace,
+			})
 		}
 	}
-	m.Metadata = append(m.Metadata, yaml.MapItem{
-		Key:   "namespace",
-		Value: patch.Namespace,
-	})
 	return m
 }
 

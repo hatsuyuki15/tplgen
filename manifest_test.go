@@ -79,3 +79,25 @@ func TestPatchWithNoNamespace(t *testing.T) {
 		t.Fatal("Expected `dev` namespace but got:", res)
 	}
 }
+
+func TestPatch_ShouldNotPatchEmpty(t *testing.T) {
+	manifest := Manifest{
+		ApiVersion: "apps/v1",
+		Kind:       "Deployment",
+		Metadata: yaml.MapSlice{
+			{
+				Key:   "Namespace",
+				Value: "default",
+			},
+		},
+		Spec: yaml.MapSlice{},
+	}
+	patch := Patch{
+		Namespace: "",
+		Resources: nil,
+	}
+	res := manifest.patch(patch)
+	if manifest.Metadata[0].Value != "default" {
+		t.Fatal("Expected `default` namespace but got:", res)
+	}
+}

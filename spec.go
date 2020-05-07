@@ -39,6 +39,8 @@ func parseSpec(data string) Spec {
 }
 
 func (s Spec) patch(patch Patch) Spec {
-	s.Namespace = patch.Namespace
+	if patch.Namespace != "" {
+		s.Namespace = patch.Namespace
+	}
 	return s
 }
