@@ -30,7 +30,7 @@ func (m Manifest) patch(patch Patch) Manifest {
 		}
 	}
 	m.Metadata = append(m.Metadata, yaml.MapItem{
-		Key:   "Namespace",
+		Key:   "namespace",
 		Value: patch.Namespace,
 	})
 	return m
