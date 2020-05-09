@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 )
 
+var output bytes.Buffer
+
 func main() {
 	workingDir, err := os.Getwd()
 	if err != nil {
@@ -26,6 +28,11 @@ func main() {
 		patch := parsePatch(data)
 		processPatch(patch, file, templateDir)
 	}
+	flushOutput()
+}
+
+func flushOutput() {
+	fmt.Println(output.String())
 }
 
 func processPatch(patch Patch, patchFile string, templateDir string) {
@@ -47,18 +54,18 @@ func processResource(resource string, patch Patch, templateDir string) {
 		spec := parseSpec(data)
 		spec = spec.patch(patch)
 		evaluatedResult := evaluate(spec, templateDir)
-		writeToStdout(resource, evaluatedResult)
+		writeToOutput(resource, evaluatedResult)
 	} else {
 		manifest := parseManifest(data)
 		manifest = manifest.patch(patch)
-		writeToStdout(resource, manifest.evaluate())
+		writeToOutput(resource, manifest.evaluate())
 	}
 }
 
-func writeToStdout(file string, content string) {
-	fmt.Println("---")
-	fmt.Println("#", file)
-	fmt.Println(content)
+func writeToOutput(file string, content string) {
+	output.WriteString("---" + "\n")
+	output.WriteString("#" + file + "\n")
+	output.WriteString(content + "\n")
 }
 
 func evaluate(spec Spec, templateDir string) string {
