@@ -33,7 +33,9 @@ func processPatch(patch Patch, patchFile string, templateDir string) {
 		resourceRootPath := filepath.Dir(patchFile)
 		resources := listFiles(resourceRootPath, resourcePath)
 		for _, resource := range resources {
-			processResource(resource, patch, templateDir)
+			if filepath.Base(resource) != "tplgen.yaml" {
+				processResource(resource, patch, templateDir)
+			}
 		}
 	}
 }
