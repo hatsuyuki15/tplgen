@@ -6,16 +6,12 @@ import (
 )
 
 type Manifest struct {
-	ApiVersion string `yaml:"apiVersion"`
-	Kind       string
-	Metadata   yaml.MapSlice
-	Spec       yaml.MapSlice `yaml:"spec,omitempty"`
-	Data 	   yaml.MapSlice `yaml:"data,omitempty"`
+	data yaml.MapSlice
 }
 
 func parseManifest(data string) Manifest {
 	var manifest Manifest
-	err := yaml.Unmarshal([]byte(data), &manifest)
+	err := yaml.Unmarshal([]byte(data), &manifest.data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,26 +20,51 @@ func parseManifest(data string) Manifest {
 
 func (m Manifest) patch(patch Patch) Manifest {
 	if patch.Namespace != "" {
-		var namespaceExist = false
-		for i, item := range m.Metadata {
-			if item.Key == "Namespace" {
-				item.Value = patch.Namespace
-				m.Metadata[i] = item
-				namespaceExist = true
+		for i, item := range m.data {
+			if item.Key == "metadata" {
+				metadata := item.Value.(yaml.MapSlice)
+				existNamespace := false
+				for j, metadataElem := range metadata {
+					if metadataElem.Key == "namespace" {
+						metadataElem.Value = patch.Namespace
+						metadata[j] = metadataElem
+						existNamespace = true
+					}
+				}
+				if !existNamespace {
+					metadata = append(metadata, yaml.MapItem{
+						Key:   "namespace",
+						Value: patch.Namespace,
+					})
+					m.data[i].Value = metadata
+				}
 			}
-		}
-		if !namespaceExist {
-			m.Metadata = append(m.Metadata, yaml.MapItem{
-				Key:   "namespace",
-				Value: patch.Namespace,
-			})
 		}
 	}
 	return m
 }
 
+func (m *Manifest) Namespace() string {
+	metadata := get(m.data, "metadata").(yaml.MapSlice)
+	namespace := get(metadata, "namespace")
+	if namespace == nil {
+		return ""
+	} else {
+		return namespace.(string)
+	}
+}
+
+func get(slice yaml.MapSlice, key string) interface{} {
+	for _, item := range slice {
+		if item.Key == key {
+			return item.Value
+		}
+	}
+	return nil
+}
+
 func (m Manifest) evaluate() string {
-	out, err := yaml.Marshal(m)
+	out, err := yaml.Marshal(m.data)
 	if err != nil {
 		log.Fatal(err)
 	}

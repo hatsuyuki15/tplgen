@@ -2,7 +2,6 @@ package main
 
 import (
 	"gopkg.in/yaml.v2"
-	"strings"
 	"testing"
 )
 
@@ -12,6 +11,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: artifactory
+  namespace: default
   labels:
     app: artifactory
 spec:
@@ -36,68 +36,74 @@ spec:
       app: artifactory
 `
 	manifest := parseManifest(data)
-	if strings.Compare(manifest.ApiVersion, "apps/v1") != 0 {
-		t.Fatal("apiVersion mismatch")
+	if manifest.Namespace() != "default" {
+		t.Fatal("Expected `default` namespace got: ", manifest)
 	}
 }
 
 func TestPatchWithExistingNameSpace(t *testing.T) {
 	manifest := Manifest{
-		ApiVersion: "apps/v1",
-		Kind:       "Deployment",
-		Metadata: yaml.MapSlice{
+		data: yaml.MapSlice{
 			{
-				Key:   "Namespace",
-				Value: "default",
+				Key: "metadata",
+				Value: yaml.MapSlice{
+					{
+						Key:   "namespace",
+						Value: "default",
+					},
+				},
 			},
 		},
-		Spec: yaml.MapSlice{},
 	}
 	patch := Patch{
 		Namespace: "dev",
 		Resources: nil,
 	}
 	res := manifest.patch(patch)
-	if !(len(res.Metadata) > 0 && res.Metadata[0].Value == "dev") {
-		t.Fatal("Expected `dev` namespace but got:", res)
+	if res.Namespace() != "dev" {
+		t.Fatal("Expected `dev` namespace got: ", res)
 	}
 }
 
 func TestPatchWithNoNamespace(t *testing.T) {
 	manifest := Manifest{
-		ApiVersion: "apps/v1",
-		Kind:       "Deployment",
-		Metadata:   yaml.MapSlice{},
-		Spec:       yaml.MapSlice{},
+		data: yaml.MapSlice{
+			{
+				Key:   "metadata",
+				Value: yaml.MapSlice{},
+			},
+		},
 	}
 	patch := Patch{
 		Namespace: "dev",
 		Resources: nil,
 	}
 	res := manifest.patch(patch)
-	if !(len(res.Metadata) > 0 && res.Metadata[0].Value == "dev") {
-		t.Fatal("Expected `dev` namespace but got:", res)
+	if res.Namespace() != "dev" {
+		t.Fatal("Expected `dev` namespace got: ", res)
 	}
 }
 
 func TestPatch_ShouldNotPatchEmpty(t *testing.T) {
 	manifest := Manifest{
-		ApiVersion: "apps/v1",
-		Kind:       "Deployment",
-		Metadata: yaml.MapSlice{
+		data: yaml.MapSlice{
 			{
-				Key:   "Namespace",
-				Value: "default",
+				Key: "metadata",
+				Value: yaml.MapSlice{
+					{
+						Key:   "namespace",
+						Value: "default",
+					},
+				},
 			},
 		},
-		Spec: yaml.MapSlice{},
 	}
 	patch := Patch{
 		Namespace: "",
 		Resources: nil,
 	}
 	res := manifest.patch(patch)
-	if manifest.Metadata[0].Value != "default" {
-		t.Fatal("Expected `default` namespace but got:", res)
+	if res.Namespace() != "default" {
+		t.Fatal("Expected `default` namespace got: ", res)
 	}
 }
