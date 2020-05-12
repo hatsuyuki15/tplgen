@@ -56,9 +56,11 @@ func processResource(resource string, patch Patch, templateDir string) {
 		evaluatedResult := evaluate(spec, templateDir)
 		writeToOutput(resource, evaluatedResult)
 	} else {
-		manifest := parseManifest(data)
-		manifest = manifest.patch(patch)
-		writeToOutput(resource, manifest.evaluate())
+		manifests := parseManifests(data)
+		for _, manifest := range manifests {
+			manifest = manifest.patch(patch)
+			writeToOutput(resource, manifest.evaluate())
+		}
 	}
 }
 

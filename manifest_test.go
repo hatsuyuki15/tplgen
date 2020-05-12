@@ -35,7 +35,8 @@ spec:
     matchLabels:
       app: artifactory
 `
-	manifest := parseManifest(data)
+	manifests := parseManifests(data)
+	manifest := manifests[0]
 	if manifest.Namespace() != "default" {
 		t.Fatal("Expected `default` namespace got: ", manifest)
 	}

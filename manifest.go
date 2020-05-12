@@ -3,19 +3,25 @@ package main
 import (
 	"gopkg.in/yaml.v2"
 	"log"
+	"strings"
 )
 
 type Manifest struct {
 	data yaml.MapSlice
 }
 
-func parseManifest(data string) Manifest {
-	var manifest Manifest
-	err := yaml.Unmarshal([]byte(data), &manifest.data)
-	if err != nil {
-		log.Fatal(err)
+func parseManifests(data string) (manifests []Manifest) {
+	data = strings.ReplaceAll(data, "\r\n", "\n")
+	docs := strings.Split(data, "\n---\n")
+	for _, doc := range docs {
+		var mf Manifest
+		err := yaml.Unmarshal([]byte(doc), &mf.data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		manifests = append(manifests, mf)
 	}
-	return manifest
+	return manifests
 }
 
 func (m Manifest) patch(patch Patch) Manifest {
