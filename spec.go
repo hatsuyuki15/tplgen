@@ -13,6 +13,8 @@ type Spec struct {
 }
 
 func (s Spec) toYtt() string {
+	s.validate()
+
 	out, err := yaml.Marshal(s)
 	if err != nil {
 		log.Fatal(err)
@@ -22,11 +24,22 @@ func (s Spec) toYtt() string {
 }
 
 func (s Spec) toHelm() string {
+	s.validate()
+
 	out, err := yaml.Marshal(s.Values)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return string(out)
+}
+
+func (s Spec) validate() {
+	if s.Namespace == "" {
+		log.Fatal("Namespace must not empty: ", s)
+	}
+	if s.Name == "" {
+		log.Fatal("Name must not be empty: ", s)
+	}
 }
 
 func parseSpec(data string) Spec {
