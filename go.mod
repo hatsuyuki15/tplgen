@@ -1,4 +1,4 @@
-module tplgen
+module github.com/hatsuyuki15/tplgen
 
 go 1.13
 
